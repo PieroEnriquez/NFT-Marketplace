@@ -79,5 +79,45 @@ contract NFTMarketplace is ERC721URIStorage {
         _transfer(msg.sender, address(this), tokenId);
     }
 
+    function getAllNFTs() public view returns(ListedToken[] memory) {
+        uint nftCount = _tokenIds.current();
+        ListedToken[] memory tokens = new ListedToken[](nftCount);
+
+        for (uint i = 0; i < nftCount; i++) {
+            uint currentId = i + 1;
+            ListedToken storage currentItem = idToListedToken[currentId];
+            tokens[currentIndex] = currentItem;
+            currentIndex++;
+        }
+
+        return tokens;
+    }
+
+    function getMyNFTs() public view returns(ListedToken[] memory) {
+        uint totalItemCount = _tokenIds.current();
+        uint itemCount = 0;
+        uint currentIndex = 0;
+
+        // Checking the amount of NFTs that belong to the user
+        for (uint i = 0; i < totalItemCount; i++) {
+            if (idToListedToken[i+1].owner == msg.sender || idToListedToken[i+1].seller == msg.sender) {
+                itemCount++;
+            }
+        }
+
+        // Saving the possesed NFTs on an array
+        ListedTokens[] memory items = new ListedTokens[](itemCount);
+        for (uint i = 0; i < totalItemCount; i++) {
+            if (idToListedToken[i+1].owner == msg.sender || idToListedToken[i+1].seller == msg.sender) {
+                uint currentId = i+1;
+                ListedToken storage currentItem = idToListedToken[currentId];
+                items[currentIndex] = currentItem;
+                currentIndex++;
+            }
+        }
+
+        return items;
+    }
+
 
 }
