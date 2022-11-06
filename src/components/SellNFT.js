@@ -1,15 +1,61 @@
-import Navbar from "./Navbar";
-import { useState } from "react";
-import { uploadFileToIPFS, uploadJSONToIPFS } from "../pinata";
-import Marketplace from '../Marketplace.json';
-import { useLocation } from "react-router";
+import Navbar from "./Navbar"
+import { useState } from "react"
+import { uploadFileToIPFS, uploadJSONToIPFS } from "../pinata"
+import Marketplace from '../Marketplace.json'
+import { useLocation } from "react-router"
 
 export default function SellNFT () {
-    const [formParams, updateFormParams] = useState({ name: '', description: '', price: ''});
-    const [fileURL, setFileURL] = useState(null);
-    const ethers = require("ethers");
-    const [message, updateMessage] = useState('');
-    const location = useLocation();
+    const [formParams, updateFormParams] = useState({ name: '', description: '', price: ''})
+    const [fileURL, setFileURL] = useState(null)
+    const ethers = require("ethers")
+    const [message, updateMessage] = useState('')
+    const location = useLocation()
+
+    const OnChangeFile = async (e) => {
+        let file = e.target.files[0]
+
+        try {
+            const response = await uploadFileToIPFS(file)
+            if (response.success === true) {
+                console.log('Uploaded image to Pinata:', response.pinataURL)
+            }
+        } catch (error) {
+            console.log('Error during file upload', e)
+        }
+    }
+
+    const uploadMetadataToIPFS = async () => {
+
+    }
+
+    const listNFT = async (e) => {
+        e.preventDefault()
+
+        try {
+            const metadataURL = await uploadMetadataToIPFS()
+            const provider = new ethers.providers.Web3Provider(window.ethereum)
+            const signer = provider.getSigner()
+
+            updateMessage("Please wait... uploading (up to 5 minutes)")
+
+            let contract = new ethers.Contract(Marketplace.address, Marketplace.abi, signer)
+
+            const price = ethers.utils.parseUnits(formParams.price, 'ethers')
+            let listingPrice = await contract.getListPrice()
+            listingPrice = listingPrice.toString()
+
+            let transaction = await contract.createToken(metadataURL, listingPrice, {value: listingPrice})
+            await transaction.wait()
+
+            alert('Successfully listed your NFT!')
+            updateMessage('')
+            updateFormParams({name:'', description: '', price: ''})
+            window.location.replace('/')
+            
+        } catch (error) {
+            alert('Upload error: ' + error)
+        }
+    }
 
     return (
         <div className="">
@@ -31,7 +77,7 @@ export default function SellNFT () {
                 </div>
                 <div>
                     <label className="block text-purple-500 text-sm font-bold mb-2" htmlFor="image">Upload Image</label>
-                    <input type={"file"} onChange={""}></input>
+                    <input type={"file"} onChange={OnChangeFile}></input>
                 </div>
                 <br></br>
                 <div className="text-green text-center">{message}</div>
