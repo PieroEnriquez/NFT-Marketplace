@@ -12,6 +12,9 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router';
 
 function Navbar() {
+
+  const nav = document.querySelector('nav')
+  
   
   const [connected, toggleConnect] = useState(false);
   const location = useLocation();
@@ -58,7 +61,7 @@ function Navbar() {
     let val = window.ethereum.isConnected()
 
     if (val) {
-      console.log('is it because of this?', val)
+      console.log('here')
       getAddress()
       toggleConnect(val)
       updateButton()
@@ -74,10 +77,9 @@ function Navbar() {
         <ul className='flex items-end justify-between py-3 bg-transparent text-white pr-5'>
         <li className='flex items-end ml-5 pb-2'>
           <Link to="/">
-          <img src={fullLogo} alt="" width={120} height={120} className="inline-block -mt-2"/>
-          <div className='inline-block font-bold text-xl ml-2'>
-            NFT Marketplace
-          </div>
+            <div className='inline-block font-bold text-xl ml-2'>
+              NFT Marketplace
+            </div>
           </Link>
         </li>
         <li className='w-2/6'>
@@ -110,7 +112,7 @@ function Navbar() {
             </li>              
             }  
             <li>
-              <button className="enableEthereumButton bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm" onClick={connectWebsite}>{connected? "Connected":"Connect Wallet"}</button>
+              <button className="enableEthereumButton bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm" type='button' onClick={connectWebsite}>{connected? "Connected":"Connect Wallet"}</button>
             </li>
           </ul>
         </li>
