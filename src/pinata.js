@@ -1,7 +1,5 @@
-import env from "react-dotenv"
-
-const key = env.PINATA_API_KEY;
-const secret = env.PINATA_API_SECRET;
+const key = process.env.PINATA_API_KEY;
+const secret = process.env.PINATA_API_SECRET;
 
 const axios = require('axios');
 const FormData = require('form-data');
