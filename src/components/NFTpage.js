@@ -7,9 +7,9 @@ import { useState } from "react";
 
 export default function NFTPage (props) {
 
-const [data, updateData] = useState({});
-const [message, updateMessage] = useState("");
-const [currAddress, updateCurrAddress] = useState("0x");
+    const [data, updateData] = useState({});
+    const [message, updateMessage] = useState("");
+    const [currAddress, updateCurrAddress] = useState("0x");
 
     return(
         <div style={{"min-height":"100vh"}}>
@@ -33,7 +33,7 @@ const [currAddress, updateCurrAddress] = useState("0x");
                         Seller: <span className="text-sm">{data.seller}</span>
                     </div>
                     <div>
-                    { currAddress == data.owner || currAddress == data.seller ?
+                    { currAddress === data.owner || currAddress === data.seller ?
                         <div className="text-emerald-700">You are the owner of this NFT</div>
                         : <button className="enableEthereumButton bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm">Buy this NFT</button>
                     }

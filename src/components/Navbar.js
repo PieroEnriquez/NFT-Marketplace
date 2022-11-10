@@ -11,10 +11,7 @@ import {
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router';
 
-function Navbar() {
-
-  const nav = document.querySelector('nav')
-  
+function Navbar() {  
   
   const [connected, toggleConnect] = useState(false);
   const location = useLocation();
@@ -50,7 +47,6 @@ function Navbar() {
     await window.ethereum.request({ method: 'eth_requestAccounts' })
       .then(() => {
         updateButton()
-        console.log('here')
         getAddress()
         window.location.replace(location.pathname)
       })
@@ -61,7 +57,6 @@ function Navbar() {
     let val = window.ethereum.isConnected()
 
     if (val) {
-      console.log('here')
       getAddress()
       toggleConnect(val)
       updateButton()

@@ -55,11 +55,11 @@ export default function SellNFT () {
 
             let contract = new ethers.Contract(Marketplace.address, Marketplace.abi, signer)
 
-            const price = ethers.utils.parseUnits(formParams.price, 'ethers')
+            const price = ethers.utils.parseUnits(formParams.price, 'ether')
             let listingPrice = await contract.getListPrice()
             listingPrice = listingPrice.toString()
 
-            let transaction = await contract.createToken(metadataURL, price, {value: listingPrice})
+            let transaction = await contract.createToken(metadataURL, ethers.BigNumber.from(price), {value: listingPrice})
             await transaction.wait()
 
             alert('Successfully listed your NFT!')

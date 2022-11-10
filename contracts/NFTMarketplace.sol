@@ -14,7 +14,7 @@ contract NFTMarketplace is ERC721URIStorage {
     Counters.Counter private _tokenIds;
     Counters.Counter private _itemsSold;
 
-    uint256 listPrice = 0.01 ether;
+    uint256 listPrice = 0.001 ether;
     
     constructor () ERC721("NFTMarketplace", "NFTM") {
         owner = payable(msg.sender);
@@ -27,6 +27,14 @@ contract NFTMarketplace is ERC721URIStorage {
         uint256 price;
         bool currentlyListed;
     }
+
+    event TokenListedSuccess (
+        uint256 indexed tokenId,
+        address owner,
+        address seller,
+        uint256 price,
+        bool currentlyListed
+    );
 
     mapping(uint256 => ListedToken) private idToListedToken;
 
@@ -53,11 +61,10 @@ contract NFTMarketplace is ERC721URIStorage {
     }
 
     function createToken(string memory tokenURI, uint256 price) public payable returns (uint) {
-        require(msg.value == listPrice, "Send enough ether to list");
-        require(price > 0, "Make sure the price isn't negative");
-
+        
         _tokenIds.increment();
         uint256 currentTokenId = _tokenIds.current();
+
         _safeMint(msg.sender, currentTokenId);
 
         _setTokenURI(currentTokenId, tokenURI);
@@ -68,6 +75,9 @@ contract NFTMarketplace is ERC721URIStorage {
     }
 
     function createListedToken(uint256 tokenId, uint256 price) private {
+        require(msg.value == listPrice, "Send enough ether to list");
+        require(price > 0, "Make sure the price isn't negative");
+
         idToListedToken[tokenId] = ListedToken(
             tokenId,
             payable(address(this)),
@@ -77,15 +87,24 @@ contract NFTMarketplace is ERC721URIStorage {
         );
 
         _transfer(msg.sender, address(this), tokenId);
+
+        emit TokenListedSuccess(
+            tokenId,
+            address(this),
+            msg.sender,
+            price,
+            true
+        );
     }
 
     function getAllNFTs() public view returns(ListedToken[] memory) {
         uint nftCount = _tokenIds.current();
         ListedToken[] memory tokens = new ListedToken[](nftCount);
         uint currentIndex = 0;
+        uint currentId;
 
         for (uint i = 0; i < nftCount; i++) {
-            uint currentId = i + 1;
+            currentId = i + 1;
             ListedToken storage currentItem = idToListedToken[currentId];
             tokens[currentIndex] = currentItem;
             currentIndex++;
@@ -98,6 +117,7 @@ contract NFTMarketplace is ERC721URIStorage {
         uint totalItemCount = _tokenIds.current();
         uint itemCount = 0;
         uint currentIndex = 0;
+        uint currentId;
 
         // Checking the amount of NFTs that belong to the user
         for (uint i = 0; i < totalItemCount; i++) {
@@ -110,7 +130,7 @@ contract NFTMarketplace is ERC721URIStorage {
         ListedToken[] memory items = new ListedToken[](itemCount);
         for (uint i = 0; i < totalItemCount; i++) {
             if (idToListedToken[i+1].owner == msg.sender || idToListedToken[i+1].seller == msg.sender) {
-                uint currentId = i+1;
+                currentId = i+1;
                 ListedToken storage currentItem = idToListedToken[currentId];
                 items[currentIndex] = currentItem;
                 currentIndex++;
@@ -122,12 +142,13 @@ contract NFTMarketplace is ERC721URIStorage {
 
     function executeSale(uint256 tokenId) public payable {
         uint price = idToListedToken[tokenId].price;
+        address seller = idToListedToken[tokenId].seller;
         require(msg.value == price, "Please submit the asking price for the NFT in order to purchase");
 
-        address seller = idToListedToken[tokenId].seller;
 
         idToListedToken[tokenId].currentlyListed = true;
         idToListedToken[tokenId].seller = payable(msg.sender);
+        _itemsSold.increment();
 
         _transfer(address(this), msg.sender, tokenId);
 
